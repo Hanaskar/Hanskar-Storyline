@@ -69,28 +69,27 @@
           <span id="aspect-ratio-badge" class="text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded-full uppercase">16:9</span>
         </div>
         <p class="text-xs text-slate-400 flex items-center gap-1.5 mt-0.5">
-          <span>Sutradara:</span>
-          <input 
-            type="text" 
-            id="project-director" 
-            value="Nathan Izz Wardhana" 
-            oninput="updateProjectMeta('director', this.value)"
-            class="bg-transparent border-b border-transparent hover:border-slate-700 focus:border-indigo-500 focus:outline-none text-slate-300 font-medium px-1 py-0.1 w-40"
-          />
-        </p>
-      </div>
-    </div>
+      <span>Sutradara:</span>
+      <input 
+        type="text" 
+        id="project-director" 
+        value="Nathan Izz Wardhana" 
+        oninput="updateProjectMeta('director', this.value)"
+        class="bg-transparent border-b border-transparent hover:border-slate-700 focus:border-indigo-500 focus:outline-none text-slate-300 font-medium px-1 py-0.1 w-40"
+      />
+    </p>
+  </div>
+</div>
 
-    <!-- Active Room Status Indicator -->
-    <div id="sync-status-indicator" class="flex items-center gap-2.5 px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-xl text-xs font-semibold">
-      <span class="w-2 h-2 rounded-full bg-slate-600" id="sync-dot"></span>
-      <span class="text-slate-400" id="sync-text">Database Off-line</span>
-      <button id="invite-btn" onclick="copyInviteLink()" class="hidden px-2 py-0.5 bg-indigo-950/40 text-indigo-400 hover:bg-indigo-950/80 border border-indigo-900/40 rounded text-[10px] transition font-bold">Salin Link</button>
-    </div>
+<!-- Active Database Status Indicator -->
+<div id="sync-status-indicator" class="flex items-center gap-2.5 px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-xl text-xs font-semibold">
+  <span class="w-2 h-2 rounded-full bg-emerald-500" id="sync-dot"></span>
+  <span class="text-slate-400 font-bold" id="sync-text">Cloud Sync Aktif</span>
+</div>
 
-    <!-- Navigation Tabs -->
-    <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800">
-      <button onclick="switchTab('storyline')" id="tab-storyline" class="px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition text-slate-400 hover:text-slate-200">
+<!-- Navigation Tabs -->
+<div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800">
+  <button onclick="switchTab('storyline')" id="tab-storyline" class="px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition text-slate-400 hover:text-slate-200">
         <i data-lucide="file-text" class="w-4 h-4"></i> Storyline & Script
       </button>
       <button onclick="switchTab('storyboard')" id="tab-storyboard" class="px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition text-slate-400 hover:text-slate-200">
@@ -262,57 +261,29 @@
     </div>
 
     <!-- ==================== TAB 4: SETTINGS & EXPORT ==================== -->
-    <div id="tab-content-settings" class="max-w-2xl mx-auto space-y-6">
-      
-      <!-- DATABASE CONFIGURATION CARD -->
-      <div class="bg-slate-900 border border-indigo-950/80 rounded-3xl p-6 space-y-4 shadow-xl">
-        <h3 class="text-md font-bold text-slate-100 flex items-center gap-2">
-          <i data-lucide="database" class="w-5 h-5 text-indigo-400"></i>
-          Google Sheets Database Sync
-        </h3>
-        <p class="text-xs text-slate-400 leading-relaxed">Hubungkan PrevisStudio ke Google Sheets milikmu agar data otomatis tersinkronisasi antar perangkat (bisa dibuka di HP teman atau laptop lain secara bersamaan).</p>
-        
-        <div class="space-y-3">
-          <div>
-            <label class="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1">Google Web App URL</label>
-            <input 
-              type="text" 
-              id="db-sheet-url"
-              placeholder="https://script.google.com/macros/s/XXXXX/exec"
-              class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:outline-none rounded-xl p-3.5 text-xs text-slate-300"
-            />
-          </div>
-          
-          <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
-            <div class="flex gap-2">
-              <button onclick="saveDatabaseConfig()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition">
-                Simpan & Aktifkan
-              </button>
-              <button onclick="testDatabaseConnection()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition">
-                Tes Hubungkan
-              </button>
-            </div>
-            <div class="flex items-center gap-1.5" id="db-status-badge">
-              <span class="w-2 h-2 rounded-full bg-slate-600"></span>
-              <span class="text-[10px] uppercase font-bold text-slate-500">Offline</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="p-3.5 bg-slate-950 rounded-xl border border-slate-850 text-[11px] text-slate-500 space-y-1">
-          <p class="font-bold text-slate-400">Panduan Ringkas Setup:</p>
-          <ol class="list-decimal list-inside space-y-0.5">
-            <li>Buka Google Sheets baru, lalu klik menu <span class="font-semibold text-slate-300">Extensions -> Apps Script</span>.</li>
-            <li>Hapus kode bawaan, ganti dengan script yang ada di panel kanan, lalu klik ikon **Save (Floppy Disk)**.</li>
-            <li>Klik tombol biru **Deploy -> New deployment**, pilih jenis **Web app**.</li>
-            <li>Ubah bagian **Who has access** menjadi **Anyone**, lalu klik **Deploy**.</li>
-            <li>Salin **Web app URL** yang muncul, lalu tempel di kolom input di atas!</li>
-          </ol>
-        </div>
+<div id="tab-content-settings" class="max-w-2xl mx-auto space-y-6 hidden">
+  
+  <!-- DATABASE STATUS CARD -->
+  <div class="bg-slate-900 border border-emerald-950/80 rounded-3xl p-6 space-y-4 shadow-xl">
+    <h3 class="text-md font-bold text-slate-100 flex items-center gap-2">
+      <i data-lucide="database" class="w-5 h-5 text-emerald-400"></i>
+      Cloud Database Hanaskar Team
+    </h3>
+    <p class="text-xs text-slate-400 leading-relaxed">Sistem sinkronisasi otomatis telah ditanamkan ke dalam website secara permanen. Di mana pun kamu atau temanmu membuka link website ini, datanya akan langsung sama dan ter-update secara real-time.</p>
+    
+    <div class="p-4 bg-slate-950 rounded-2xl border border-emerald-900/15 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+        <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Koneksi Otomatis Aktif</span>
       </div>
+      <button onclick="copyInviteLink()" class="px-4 py-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-bold transition flex items-center gap-2">
+        <i data-lucide="share-2" class="w-4 h-4"></i> Salin Link Website
+      </button>
+    </div>
+  </div>
 
-      <!-- Pitch deck Meta -->
-      <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-6">
+  <!-- Pitch deck Meta -->
+  <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-6">
         <div class="border-b border-slate-800 pb-4">
           <h3 class="text-md font-bold text-slate-100 flex items-center gap-2">
             <i data-lucide="file-text" class="w-5 h-5 text-indigo-400"></i>
@@ -472,244 +443,133 @@
   </footer>
 
   <!-- ==================== APPLICATION CORE LOGIC ==================== -->
-  <script>
-    // Config
-    const apiKey = "";
-    let activeTab = "storyline";
+<script>
+  // Config
+  const apiKey = "";
+  const hardcodedSheetUrl = "https://script.google.com/macros/s/AKfycbwkqQ_dZWrS-ZhHoTc1VOgT1FdWc5hmhI7OHdjKpO83mOKGHacLQhXURF5LqQLY8pg5/exec";
+  const currentRoom = "hanaskar_global_project";
+  const myUserId = Math.random().toString(36).substring(7);
+  let activeTab = "storyline";
 
-    // Unique Client ID to track edits and avoid self-overwrites in multi-device sync
-    const myUserId = Math.random().toString(36).substring(7);
+  // Application State with Local Storage Backup
+  let state = {
+    projectTitle: "Neon Dreams - MV Concept",
+    director: "Nathan Izz Wardhana",
+    client: "",
+    genre: "",
+    aspectRatio: "16:9",
+    senderId: myUserId, // Tracking changes creator
+    storyline: [
+      { id: '1', sceneNo: '1', video: 'Pembuka: Close-up mata artis yang perlahan terbuka, diiringi pencahayaan neon merah jambu redup.', audio: 'Instrumen synthwave mulai masuk perlahan (fade-in), detak jantung konstan.', duration: '5s', angle: 'Extreme Close-Up' },
+      { id: '2', sceneNo: '2', video: 'Artis berjalan menyusuri lorong sempit yang dipenuhi lampu neon bergaya retro-futuristik.', audio: 'Vokal utama masuk dengan efek reverb tinggi: "Di bawah bayang malam..."', duration: '8s', angle: 'Tracking Shot' },
+      { id: '3', sceneNo: '3', video: 'Siluet bayangan menari di balik dinding kaca buram dengan warna biru kontras.', audio: 'Ketukan drum (beat) penuh masuk, tempo meningkat.', duration: '6s', angle: 'Medium Shot' }
+    ],
+    storyboard: [
+      { id: 's1', panelNo: 1, image: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=500&q=80', description: 'Transisi visual dari gelap gulita ke pancaran lampu neon fuchsia.', camera: 'Extreme Close-Up', duration: '5s' },
+      { id: 's2', panelNo: 2, image: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=500&q=80', description: 'Pemeran utama menghadap ke jendela kota malam yang diguyur hujan.', camera: 'Medium Close-Up', duration: '8s' },
+      { id: 's3', panelNo: 3, image: null, description: 'Layar terbagi dua (split screen) menampilkan refleksi mata dan kota futuristik.', camera: 'Split Screen', duration: '6s' }
+    ],
+    moodboard: [
+      { id: 'm1', type: 'sticky', x: 50, y: 50, w: 180, h: 180, content: 'Konsep MV: Cyberpunk Melankolis dengan paduan warna hangat/dingin kontras.', bg: '#fbbf24', color: '#1e293b' },
+      { id: 'm2', type: 'palette', x: 280, y: 50, w: 220, h: 120, content: '#FF0055,#00F0FF,#1A0B2E,#7000FF', bg: '#ffffff', color: '' },
+      { id: 'm3', type: 'image', x: 50, y: 260, w: 240, h: 180, content: 'https://images.unsplash.com/photo-1515260268569-9271009adfdb?auto=format&fit=crop&w=500&q=80', bg: '', color: '' },
+      { id: 'm4', type: 'text', x: 320, y: 220, w: 200, h: 100, content: 'Referensikan gaya visual dari film Blade Runner & Drive (2011).', bg: '#4f46e5', color: '#ffffff' }
+    ]
+  };
 
-    // Read URL Parameters to see if user is in an active Room
-    const urlParams = new URLSearchParams(window.location.search);
-    let currentRoom = urlParams.get('room') || null;
-
-    // Application State with Local Storage Backup
-    let state = {
-      projectTitle: "Neon Dreams - MV Concept",
-      director: "Nathan Izz Wardhana",
-      client: "",
-      genre: "",
-      aspectRatio: "16:9",
-      senderId: myUserId, // Tracking changes creator
-      storyline: [
-        { id: '1', sceneNo: '1', video: 'Pembuka: Close-up mata artis yang perlahan terbuka, diiringi pencahayaan neon merah jambu redup.', audio: 'Instrumen synthwave mulai masuk perlahan (fade-in), detak jantung konstan.', duration: '5s', angle: 'Extreme Close-Up' },
-        { id: '2', sceneNo: '2', video: 'Artis berjalan menyusuri lorong sempit yang dipenuhi lampu neon bergaya retro-futuristik.', audio: 'Vokal utama masuk dengan efek reverb tinggi: "Di bawah bayang malam..."', duration: '8s', angle: 'Tracking Shot' },
-        { id: '3', sceneNo: '3', video: 'Siluet bayangan menari di balik dinding kaca buram dengan warna biru kontras.', audio: 'Ketukan drum (beat) penuh masuk, tempo meningkat.', duration: '6s', angle: 'Medium Shot' }
-      ],
-      storyboard: [
-        { id: 's1', panelNo: 1, image: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=500&q=80', description: 'Transisi visual dari gelap gulita ke pancaran lampu neon fuchsia.', camera: 'Extreme Close-Up', duration: '5s' },
-        { id: 's2', panelNo: 2, image: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=500&q=80', description: 'Pemeran utama menghadap ke jendela kota malam yang diguyur hujan.', camera: 'Medium Close-Up', duration: '8s' },
-        { id: 's3', panelNo: 3, image: null, description: 'Layar terbagi dua (split screen) menampilkan refleksi mata dan kota futuristik.', camera: 'Split Screen', duration: '6s' }
-      ],
-      moodboard: [
-        { id: 'm1', type: 'sticky', x: 50, y: 50, w: 180, h: 180, content: 'Konsep MV: Cyberpunk Melankolis dengan paduan warna hangat/dingin kontras.', bg: '#fbbf24', color: '#1e293b' },
-        { id: 'm2', type: 'palette', x: 280, y: 50, w: 220, h: 120, content: '#FF0055,#00F0FF,#1A0B2E,#7000FF', bg: '#ffffff', color: '' },
-        { id: 'm3', type: 'image', x: 50, y: 260, w: 240, h: 180, content: 'https://images.unsplash.com/photo-1515260268569-9271009adfdb?auto=format&fit=crop&w=500&q=80', bg: '', color: '' },
-        { id: 'm4', type: 'text', x: 320, y: 220, w: 200, h: 100, content: 'Referensikan gaya visual dari film Blade Runner & Drive (2011).', bg: '#4f46e5', color: '#ffffff' }
-      ]
-    };
-
-    // Load State from LocalStorage
-    function loadState() {
-      const saved = localStorage.getItem("previs_studio_state");
-      if (saved) {
-        try {
-          state = JSON.parse(saved);
-        } catch (e) {
-          console.error("Gagal memuat local storage", e);
-        }
-      }
-    }
-
-    // Save State to LocalStorage (and Debounce API Sync with Google Sheet)
-    let syncTimer = null;
-    function saveState() {
-      state.senderId = myUserId; // Record that we did this modification
-      localStorage.setItem("previs_studio_state", JSON.stringify(state));
-      
-      const sheetUrl = localStorage.getItem("previs_sheet_url");
-      if (sheetUrl && currentRoom) {
-        if (syncTimer) clearTimeout(syncTimer);
-        
-        // Show local loading state
-        const dot = document.getElementById("sync-dot");
-        const txt = document.getElementById("sync-text");
-        dot.className = "w-2 h-2 rounded-full bg-amber-500 animate-pulse";
-        txt.innerText = "Menyimpan ke Cloud...";
-
-        syncTimer = setTimeout(async () => {
-          try {
-            await fetch(sheetUrl, {
-              method: "POST",
-              mode: "no-cors", // Standard CORS workaround for Apps Script Web App redirects
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                room: currentRoom,
-                state: JSON.stringify(state)
-              })
-            });
-            dot.className = "w-2 h-2 rounded-full bg-emerald-500";
-            txt.innerText = `Terhubung (Room: ${currentRoom})`;
-          } catch(e) {
-            console.error("Sync error", e);
-            dot.className = "w-2 h-2 rounded-full bg-rose-500";
-            txt.innerText = "Gagal sinkronisasi!";
-          }
-        }, 1200); // 1.2s delay to prevent spamming Google Sheets on active typing
-      }
-    }
-
-    // Polling Mechanism to fetch changes from Google Sheet database
-    let pollingTimer = null;
-    function startDatabasePolling() {
-      if (pollingTimer) clearInterval(pollingTimer);
-      
-      const sheetUrl = localStorage.getItem("previs_sheet_url");
-      if (!sheetUrl || !currentRoom) return;
-
-      pollingTimer = setInterval(async () => {
-        try {
-          const response = await fetch(`${sheetUrl}?room=${currentRoom}`);
-          const resJson = await response.json();
-          
-          if (resJson && resJson.state) {
-            const remoteState = JSON.parse(resJson.state);
-            // Only update local if the sender of that change is NOT us.
-            // This avoids overwrite while typing!
-            if (remoteState && remoteState.senderId !== myUserId) {
-              state = remoteState;
-              
-              // Soft sync fields
-              document.getElementById("project-title").value = state.projectTitle;
-              document.getElementById("project-director").value = state.director;
-              document.getElementById("aspect-ratio-badge").innerText = state.aspectRatio;
-
-              renderActiveTab();
-            }
-          }
-        } catch(err) {
-          console.error("Polling database error", err);
-        }
-      }, 5000); // Polls Google Sheet every 5 seconds for real-time collaboration simulation
-    }
-
-    // Google Sheets Config controls
-    function saveDatabaseConfig() {
-      const urlInput = document.getElementById("db-sheet-url").value.trim();
-      if (!urlInput) {
-        localStorage.removeItem("previs_sheet_url");
-        showToast("Konfigurasi database dinonaktifkan.", "error");
-        updateDatabaseStatusUI();
-        return;
-      }
-
-      localStorage.setItem("previs_sheet_url", urlInput);
-      
-      // Auto assign room parameter if not exist to make it collaborative
-      if (!currentRoom) {
-        const randomRoom = 'room-' + Math.floor(1000 + Math.random() * 9000);
-        const url = new URL(window.location.href);
-        url.searchParams.set('room', randomRoom);
-        window.history.pushState({}, '', url);
-        currentRoom = randomRoom;
-      }
-
-      updateDatabaseStatusUI();
-      saveState(); // push immediate first sync
-      startDatabasePolling();
-      showToast("Google Sheet database berhasil terhubung & Room Kolaborasi Aktif!");
-    }
-
-    async function testDatabaseConnection() {
-      const urlInput = document.getElementById("db-sheet-url").value.trim();
-      if(!urlInput) {
-        showToast("Masukkan URL terlebih dahulu", "error");
-        return;
-      }
-      showToast("Mencoba menghubungkan...", "info");
+  // Load State from LocalStorage
+  function loadState() {
+    const saved = localStorage.getItem("previs_studio_state");
+    if (saved) {
       try {
-        const response = await fetch(`${urlInput}?room=test-conn-check`);
-        const json = await response.json();
-        if(json) {
-          showToast("Koneksi Sukses! Google Apps Script merespon dengan benar.");
-        }
+        state = JSON.parse(saved);
+      } catch (e) {
+        console.error("Gagal memuat local storage", e);
+      }
+    }
+  }
+
+  // Save State to LocalStorage and Auto Sync with Google Sheet
+  let syncTimer = null;
+  function saveState() {
+    state.senderId = myUserId; // Record that we did this modification
+    localStorage.setItem("previs_studio_state", JSON.stringify(state));
+    
+    const dot = document.getElementById("sync-dot");
+    const txt = document.getElementById("sync-text");
+    dot.className = "w-2 h-2 rounded-full bg-amber-500 animate-pulse";
+    txt.innerText = "Menyimpan ke Cloud...";
+
+    if (syncTimer) clearTimeout(syncTimer);
+    
+    syncTimer = setTimeout(async () => {
+      try {
+        await fetch(hardcodedSheetUrl, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            room: currentRoom,
+            state: JSON.stringify(state)
+          })
+        });
+        dot.className = "w-2 h-2 rounded-full bg-emerald-500";
+        txt.innerText = "Cloud Sync Aktif";
       } catch(e) {
-        showToast("Gagal terhubung. Pastikan CORS dan setelan Web app deploy sudah 'Anyone'", "error");
+        console.error("Sync error", e);
+        dot.className = "w-2 h-2 rounded-full bg-rose-500";
+        txt.innerText = "Gagal sinkronisasi!";
       }
-    }
+    }, 1200);
+  }
 
-    function updateDatabaseStatusUI() {
-      const sheetUrl = localStorage.getItem("previs_sheet_url");
-      const dot = document.getElementById("sync-dot");
-      const txt = document.getElementById("sync-text");
-      const badge = document.getElementById("db-status-badge");
-      const inviteBtn = document.getElementById("invite-btn");
+  // Polling Mechanism to fetch changes from Google Sheet database
+  let pollingTimer = null;
+  function startDatabasePolling() {
+    if (pollingTimer) clearInterval(pollingTimer);
 
-      if (sheetUrl) {
-        document.getElementById("db-sheet-url").value = sheetUrl;
+    pollingTimer = setInterval(async () => {
+      try {
+        const response = await fetch(`${hardcodedSheetUrl}?room=${currentRoom}`);
+        const resJson = await response.json();
         
-        if (currentRoom) {
-          dot.className = "w-2 h-2 rounded-full bg-emerald-500";
-          txt.innerText = `Terhubung (Room: ${currentRoom})`;
-          inviteBtn.classList.remove("hidden");
-          badge.innerHTML = `
-            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-            <span class="text-[10px] uppercase font-bold text-emerald-500">Online & Syncing</span>
-          `;
-        } else {
-          dot.className = "w-2 h-2 rounded-full bg-indigo-500";
-          txt.innerText = "Database Terhubung";
-          badge.innerHTML = `
-            <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
-            <span class="text-[10px] uppercase font-bold text-indigo-500">Ready</span>
-          `;
+        if (resJson && resJson.state) {
+          const remoteState = JSON.parse(resJson.state);
+          // Only update local if the sender of that change is NOT us.
+          if (remoteState && remoteState.senderId !== myUserId) {
+            state = remoteState;
+            
+            // Soft sync fields
+            document.getElementById("project-title").value = state.projectTitle;
+            document.getElementById("project-director").value = state.director;
+            document.getElementById("aspect-ratio-badge").innerText = state.aspectRatio;
+
+            renderActiveTab();
+          }
         }
-      } else {
-        dot.className = "w-2 h-2 rounded-full bg-slate-600";
-        txt.innerText = "Database Off-line";
-        inviteBtn.classList.add("hidden");
-        badge.innerHTML = `
-          <span class="w-2 h-2 rounded-full bg-slate-600"></span>
-          <span class="text-[10px] uppercase font-bold text-slate-500">Offline</span>
-        `;
+      } catch(err) {
+        console.error("Polling database error", err);
       }
-    }
+    }, 4000); // Polls Google Sheet every 4 seconds
+  }
 
-    function copyInviteLink() {
-      const dummy = document.createElement('input');
-      dummy.value = window.location.href;
-      document.body.appendChild(dummy);
-      dummy.select();
-      document.execCommand('copy');
-      document.body.removeChild(dummy);
-      showToast("Link kolaborasi berhasil disalin! Bagikan ke WhatsApp temanmu.");
-    }
+  function updateDatabaseStatusUI() {
+    // Already automatically handled, keeping to prevent errors
+  }
 
-    // Tab Switching
-    function switchTab(tabId) {
-      activeTab = tabId;
-      document.querySelectorAll('[id^="tab-content-"]').forEach(el => el.classList.add('hidden'));
-      document.getElementById(`tab-content-${tabId}`).classList.remove('hidden');
+  function copyInviteLink() {
+    // Copy main website URL (Vercel) without parameters
+    const cleanUrl = window.location.origin + window.location.pathname;
+    const dummy = document.createElement('input');
+    dummy.value = cleanUrl;
+    document.body.appendChild(dummy);
+    dummy.select();
+    document.execCommand('copy');
+    document.body.removeChild(dummy);
+    showToast("Link website berhasil disalin!");
+  }
 
-      document.querySelectorAll('[id^="tab-"]').forEach(btn => {
-        btn.className = "px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition text-slate-400 hover:text-slate-200";
-      });
-      const activeBtn = document.getElementById(`tab-${tabId}`);
-      activeBtn.className = "px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition bg-slate-800 text-white shadow-sm";
-      
-      renderActiveTab();
-    }
-
-    function renderActiveTab() {
-      if (activeTab === 'storyline') renderStoryline();
-      if (activeTab === 'storyboard') renderStoryboard();
-      if (activeTab === 'moodboard') renderMoodboard();
-      if (activeTab === 'settings') renderSettings();
-      lucide.createIcons();
-    }
-
-    // --- STORYLINE TAB HANDLERS ---
+  // --- STORYLINE TAB HANDLERS ---
     function renderStoryline() {
       const tbody = document.getElementById("storyline-table-body");
       tbody.innerHTML = "";
@@ -1526,30 +1386,28 @@
 
 
     // --- SETTINGS TAB ---
-    function renderSettings() {
-      document.getElementById("settings-title").value = state.projectTitle || "";
-      document.getElementById("settings-director").value = state.director || "";
-      document.getElementById("settings-client").value = state.client || "";
-      document.getElementById("settings-genre").value = state.genre || "";
-      updateDatabaseStatusUI();
+  function renderSettings() {
+    document.getElementById("settings-title").value = state.projectTitle || "";
+    document.getElementById("settings-director").value = state.director || "";
+    document.getElementById("settings-client").value = state.client || "";
+    document.getElementById("settings-genre").value = state.genre || "";
+  }
+
+  function updateProjectMeta(field, value) {
+    if (field === 'title') {
+      state.projectTitle = value;
+      document.getElementById("project-title").value = value;
     }
-
-    function updateProjectMeta(field, value) {
-      if (field === 'title') {
-        state.projectTitle = value;
-        document.getElementById("project-title").value = value;
-      }
-      if (field === 'director') {
-        state.director = value;
-        document.getElementById("project-director").value = value;
-      }
-      if (field === 'client') state.client = value;
-      if (field === 'genre') state.genre = value;
-      saveState();
+    if (field === 'director') {
+      state.director = value;
+      document.getElementById("project-director").value = value;
     }
+    if (field === 'client') state.client = value;
+    if (field === 'genre') state.genre = value;
+    saveState();
+  }
 
-
-    // --- AI IMAGEN GENERATOR ENGINE ---
+  // --- AI IMAGEN GENERATOR ENGINE ---
     let currentPanelAiId = null; // null means target is Moodboard
 
     function openAiImageSelector(panelId) {
@@ -1627,22 +1485,17 @@
     });
 
     // STARTUP SYSTEM
-    window.onload = function() {
-      loadState();
-      
-      // Sync DOM elements with State metadata
-      document.getElementById("project-title").value = state.projectTitle;
-      document.getElementById("project-director").value = state.director;
-      document.getElementById("aspect-ratio-badge").innerText = state.aspectRatio;
+  window.onload = function() {
+    loadState();
+    
+    // Sync DOM elements with State metadata
+    document.getElementById("project-title").value = state.projectTitle;
+    document.getElementById("project-director").value = state.director;
+    document.getElementById("aspect-ratio-badge").innerText = state.aspectRatio;
 
-      renderActiveTab();
-      updateDatabaseStatusUI();
-      
-      // Auto-start polling if GSheets database is active
-      if (localStorage.getItem("previs_sheet_url") && currentRoom) {
-        startDatabasePolling();
-      }
-    };
-  </script>
+    renderActiveTab();
+    startDatabasePolling(); // Automatically start polling the global project
+  };
+</script>
 </body>
 </html>
