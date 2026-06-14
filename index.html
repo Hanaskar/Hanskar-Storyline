@@ -3,142 +3,162 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hanaskar Team - Studio</title>
+  <title>Hanaskar Team - PrevisStudio</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: #020617; }
     ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
+<body class="bg-slate-950 text-slate-100 min-h-screen">
 
-  <!-- HEADER -->
-  <header class="border-b border-slate-800 bg-slate-900/60 backdrop-blur sticky top-0 z-40 px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+  <header class="border-b border-slate-800 bg-slate-900/60 backdrop-blur sticky top-0 z-40 px-6 py-4 flex items-center justify-between">
     <div class="flex items-center gap-4">
-      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-violet-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center">
         <i data-lucide="film" class="w-5 h-5 text-white"></i>
       </div>
       <div>
         <div class="text-[10px] font-extrabold uppercase tracking-widest text-indigo-400">Hanaskar Team</div>
         <div class="font-bold text-lg text-white">Neon Dreams - MV Concept</div>
-        <p class="text-xs text-slate-400">Sutradara: Nathan Izz Wardhana</p>
+        <div class="text-xs text-slate-400">Sutradara: Nathan Izz Wardhana</div>
       </div>
     </div>
-
-    <!-- TABS NAVIGATION -->
     <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800">
       <button onclick="switchTab('storyline')" id="tab-storyline" class="px-6 py-2 rounded-lg text-sm font-semibold transition">Storyline</button>
       <button onclick="switchTab('storyboard')" id="tab-storyboard" class="px-6 py-2 rounded-lg text-sm font-semibold transition">Storyboard</button>
     </div>
   </header>
 
-  <main class="flex-1 p-6 max-w-7xl w-full mx-auto" id="main-content">
-    <!-- Konten di-render oleh JS -->
-  </main>
+  <main class="p-6 max-w-7xl w-full mx-auto" id="main-content"></main>
 
   <script>
-    const GLOBAL_ROOM_ID = "global-hanaskar-project";
     const GAS_URL = "https://script.google.com/macros/s/AKfycbwkqQ_dZWrS-ZhHoTc1VOgT1FdWc5hmhI7OHdjKpO83mOKGHacLQhXURF5LqQLY8pg5/exec";
     
     let state = {
-      storyline: [{scene: "1", visual: "Contoh: Close up mata", audio: "Contoh: Musik masuk", duration: "5s"}],
-      storyboard: [{panel: "1", desc: "Contoh: Shot di kamar", camera: "Medium Shot"}]
+      storyline: [{scene: "1", visual: "Close up mata", audio: "Musik synthwave masuk", duration: "5s"}],
+      storyboard: [{panel: "1", desc: "Deskripsi", camera: "Wide", image: ""}]
     };
-
     let activeTab = 'storyline';
 
-    // Auto-save ke LocalStorage dan Google Sheets
+    // Perbaikan: Menambahkan try-catch agar error fetch tidak menghentikan aplikasi
     function saveState() {
       localStorage.setItem('hanaskar_state', JSON.stringify(state));
-      fetch(GAS_URL, {
-        method: "POST", mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ room: GLOBAL_ROOM_ID, state: JSON.stringify(state) })
-      }).catch(err => console.error("Sync error"));
+      try {
+        fetch(GAS_URL, {
+          method: "POST", 
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ room: "global-hanaskar-project", state: JSON.stringify(state) })
+        }).catch(e => console.log("Background sync skipped (offline/CORS)")); 
+      } catch (err) {
+        console.log("Sync error ignored");
+      }
     }
 
     function loadState() {
       const saved = localStorage.getItem('hanaskar_state');
       if (saved) state = JSON.parse(saved);
-      fetch(`${GAS_URL}?room=${GLOBAL_ROOM_ID}`)
-        .then(res => res.json())
-        .then(data => { if(data.state) { state = JSON.parse(data.state); renderActiveTab(); } })
-        .catch(() => {});
+      
+      try {
+        fetch(`${GAS_URL}?room=global-hanaskar-project`)
+          .then(res => res.json())
+          .then(data => { if(data && data.state) { state = JSON.parse(data.state); render(); } })
+          .catch(e => console.log("Load skipped (offline)"));
+      } catch (err) {
+        console.log("Load error ignored");
+      }
     }
 
-    function switchTab(tabName) { activeTab = tabName; renderActiveTab(); }
+    function switchTab(t) { activeTab = t; render(); }
 
-    function updateData(type, index, field, value) {
-      state[type][index][field] = value;
+    function addRow(t) {
+      if(t === 'storyline') state.storyline.push({scene: (state.storyline.length+1).toString(), visual: '', audio: '', duration: ''});
+      else state.storyboard.push({panel: (state.storyboard.length+1).toString(), desc: '', camera: '', image: ''});
+      saveState(); render();
+    }
+
+    function movePanel(i, d) {
+      const n = i + d;
+      if (n >= 0 && n < state.storyboard.length) {
+        [state.storyboard[i], state.storyboard[n]] = [state.storyboard[n], state.storyboard[i]];
+        state.storyboard.forEach((s, idx) => s.panel = (idx + 1).toString());
+        saveState(); render();
+      }
+    }
+
+    function update(type, i, field, val) {
+      state[type][i][field] = val;
       saveState();
     }
 
-    function addRow(type) {
-      if(type === 'storyline') state.storyline.push({scene: (state.storyline.length+1).toString(), visual: '', audio: '', duration: ''});
-      else state.storyboard.push({panel: (state.storyboard.length+1).toString(), desc: '', camera: ''});
-      renderActiveTab();
-      saveState();
+    function handleImg(i, e) {
+      const f = e.target.files[0];
+      if (f) {
+        const r = new FileReader();
+        r.onload = (ev) => { state.storyboard[i].image = ev.target.result; saveState(); render(); };
+        r.readAsDataURL(f);
+      }
     }
 
-    function renderActiveTab() {
-      const main = document.getElementById('main-content');
+    function render() {
+      const m = document.getElementById('main-content');
       if (activeTab === 'storyline') {
-        main.innerHTML = `
+        m.innerHTML = `
           <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold">Storyline</h2>
-            <button onclick="addRow('storyline')" class="bg-indigo-600 px-4 py-2 rounded-lg text-sm font-bold">+ Tambah Baris</button>
+            <button onclick="addRow('storyline')" class="bg-indigo-600 px-4 py-2 rounded-lg text-sm font-bold hover:bg-indigo-500 transition">+ Tambah Baris</button>
           </div>
           <div class="space-y-2">
             ${state.storyline.map((s, i) => `
               <div class="grid grid-cols-4 gap-4 bg-slate-900 p-4 rounded-xl border border-slate-800">
-                <input class="bg-slate-950 p-2 rounded border border-slate-800" value="${s.scene}" oninput="updateData('storyline', ${i}, 'scene', this.value)" placeholder="Scene #">
-                <input class="bg-slate-950 p-2 rounded border border-slate-800" value="${s.visual}" oninput="updateData('storyline', ${i}, 'visual', this.value)" placeholder="Visual">
-                <input class="bg-slate-950 p-2 rounded border border-slate-800" value="${s.audio}" oninput="updateData('storyline', ${i}, 'audio', this.value)" placeholder="Audio">
-                <input class="bg-slate-950 p-2 rounded border border-slate-800" value="${s.duration}" oninput="updateData('storyline', ${i}, 'duration', this.value)" placeholder="Durasi">
+                <input class="bg-slate-950 p-2 rounded border border-slate-800 text-sm" value="${s.scene}" oninput="update('storyline', ${i}, 'scene', this.value)" placeholder="Scene #">
+                <input class="bg-slate-950 p-2 rounded border border-slate-800 text-sm" value="${s.visual}" oninput="update('storyline', ${i}, 'visual', this.value)" placeholder="Visual">
+                <input class="bg-slate-950 p-2 rounded border border-slate-800 text-sm" value="${s.audio}" oninput="update('storyline', ${i}, 'audio', this.value)" placeholder="Audio">
+                <input class="bg-slate-950 p-2 rounded border border-slate-800 text-sm" value="${s.duration}" oninput="update('storyline', ${i}, 'duration', this.value)" placeholder="Durasi">
               </div>
             `).join('')}
           </div>
         `;
       } else {
-        main.innerHTML = `
+        m.innerHTML = `
           <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold">Storyboard</h2>
-            <button onclick="addRow('storyboard')" class="bg-indigo-600 px-4 py-2 rounded-lg text-sm font-bold">+ Tambah Panel</button>
+            <button onclick="addRow('storyboard')" class="bg-indigo-600 px-4 py-2 rounded-lg text-sm font-bold hover:bg-indigo-500 transition">+ Tambah Panel</button>
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             ${state.storyboard.map((s, i) => `
-              <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 space-y-2">
-                <div class="font-bold text-indigo-400">Panel ${s.panel}</div>
-                <input class="w-full bg-slate-950 p-2 rounded border border-slate-800" value="${s.desc}" oninput="updateData('storyboard', ${i}, 'desc', this.value)" placeholder="Deskripsi Adegan">
-                <input class="w-full bg-slate-950 p-2 rounded border border-slate-800" value="${s.camera}" oninput="updateData('storyboard', ${i}, 'camera', this.value)" placeholder="Camera Angle">
+              <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 space-y-4">
+                <div class="flex justify-between items-center">
+                  <div class="font-bold text-indigo-400">Panel ${s.panel}</div>
+                  <div class="flex gap-1">
+                    <button onclick="movePanel(${i}, -1)" class="p-1 hover:bg-slate-800 rounded">▲</button>
+                    <button onclick="movePanel(${i}, 1)" class="p-1 hover:bg-slate-800 rounded">▼</button>
+                  </div>
+                </div>
+                <div class="relative group h-40 bg-slate-950 rounded-lg overflow-hidden border border-slate-800 flex items-center justify-center">
+                  ${s.image ? `<img src="${s.image}" class="h-full w-full object-cover">` : '<span class="text-slate-600 text-xs">Belum ada gambar</span>'}
+                  <label class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/50 cursor-pointer transition">
+                    <i data-lucide="upload" class="w-6 h-6"></i>
+                    <input type="file" class="hidden" onchange="handleImg(${i}, event)" accept="image/*">
+                  </label>
+                </div>
+                <input class="w-full bg-slate-950 p-2 rounded border border-slate-800 text-sm" value="${s.desc}" oninput="update('storyboard', ${i}, 'desc', this.value)" placeholder="Deskripsi">
+                <input class="w-full bg-slate-950 p-2 rounded border border-slate-800 text-sm" value="${s.camera}" oninput="update('storyboard', ${i}, 'camera', this.value)" placeholder="Camera">
               </div>
             `).join('')}
           </div>
         `;
       }
-      
       document.getElementById('tab-storyline').className = (activeTab === 'storyline') ? "px-6 py-2 rounded-lg text-sm font-semibold bg-slate-800 text-white" : "px-6 py-2 rounded-lg text-sm font-semibold text-slate-400";
       document.getElementById('tab-storyboard').className = (activeTab === 'storyboard') ? "px-6 py-2 rounded-lg text-sm font-semibold bg-slate-800 text-white" : "px-6 py-2 rounded-lg text-sm font-semibold text-slate-400";
       lucide.createIcons();
     }
 
-    window.onload = function() {
-      loadState();
-      renderActiveTab();
-      setInterval(loadState, 3000); // Auto-sync setiap 3 detik
-    };
+    window.onload = () => { loadState(); render(); setInterval(loadState, 5000); };
   </script>
 </body>
 </html>
-```
-
-### Langkah Terakhir:
-1. Simpan kode di atas ke dalam file `index.html` kamu (tindih file yang lama).
-2. **Push ke GitHub** dan **deploy ke Vercel** sekali lagi (menggunakan cara yang sama seperti kemarin).
-3. Setelah link Vercel-mu terbuka, coba tulis sesuatu di Storyline, lalu buka link yang sama di HP temanmu. Data akan muncul otomatis!
-
-Sekarang aplikasinya sudah sangat rapi dan fokus buat kerja tim. Ada lagi yang kurang nyaman di tampilannya?
