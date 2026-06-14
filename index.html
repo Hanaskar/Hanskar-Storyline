@@ -1,0 +1,1648 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hanaskar Team - Workspace Produksi MV & Iklan</title>
+  
+  <!-- Tailwind CSS Play CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts (Plus Jakarta Sans) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #020617;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+    /* Dot background pattern for canvas */
+    .bg-dots {
+      background-image: radial-gradient(#1e293b 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+    
+    /* Anti-bounce dragging layout optimization */
+    .drag-handle {
+      touch-action: none;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white overflow-x-hidden">
+
+  <!-- Toast Notification Hub -->
+  <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
+
+  <!-- Primary Header Workspace -->
+  <header class="border-b border-slate-800 bg-slate-900/60 backdrop-blur sticky top-0 z-40 px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+    <div class="flex items-center gap-4">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-violet-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+        <i data-lucide="film" class="w-5 h-5 text-white"></i>
+      </div>
+      <div>
+        <div class="text-[10px] font-extrabold uppercase tracking-widest text-indigo-400">Hanaskar Team</div>
+        <div class="flex items-center gap-2">
+          <input 
+            type="text" 
+            id="project-title" 
+            value="Neon Dreams - MV Concept" 
+            oninput="updateProjectMeta('title', this.value)"
+            class="bg-transparent border-b border-transparent hover:border-slate-700 focus:border-indigo-500 focus:outline-none font-bold text-lg text-white px-1 py-0.5 rounded transition"
+          />
+          <span id="aspect-ratio-badge" class="text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded-full uppercase">16:9</span>
+        </div>
+        <p class="text-xs text-slate-400 flex items-center gap-1.5 mt-0.5">
+          <span>Sutradara:</span>
+          <input 
+            type="text" 
+            id="project-director" 
+            value="Nathan Izz Wardhana" 
+            oninput="updateProjectMeta('director', this.value)"
+            class="bg-transparent border-b border-transparent hover:border-slate-700 focus:border-indigo-500 focus:outline-none text-slate-300 font-medium px-1 py-0.1 w-40"
+          />
+        </p>
+      </div>
+    </div>
+
+    <!-- Active Room Status Indicator -->
+    <div id="sync-status-indicator" class="flex items-center gap-2.5 px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-xl text-xs font-semibold">
+      <span class="w-2 h-2 rounded-full bg-slate-600" id="sync-dot"></span>
+      <span class="text-slate-400" id="sync-text">Database Off-line</span>
+      <button id="invite-btn" onclick="copyInviteLink()" class="hidden px-2 py-0.5 bg-indigo-950/40 text-indigo-400 hover:bg-indigo-950/80 border border-indigo-900/40 rounded text-[10px] transition font-bold">Salin Link</button>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800">
+      <button onclick="switchTab('storyline')" id="tab-storyline" class="px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition text-slate-400 hover:text-slate-200">
+        <i data-lucide="file-text" class="w-4 h-4"></i> Storyline & Script
+      </button>
+      <button onclick="switchTab('storyboard')" id="tab-storyboard" class="px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition text-slate-400 hover:text-slate-200">
+        <i data-lucide="layout" class="w-4 h-4"></i> Storyboard
+      </button>
+      <button onclick="switchTab('moodboard')" id="tab-moodboard" class="px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition text-slate-400 hover:text-slate-200">
+        <i data-lucide="layers" class="w-4 h-4"></i> Mood Board Canvas
+      </button>
+      <button onclick="switchTab('settings')" id="tab-settings" class="px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition text-slate-400 hover:text-slate-200">
+        <i data-lucide="sliders" class="w-4 h-4"></i> Ekspor & Cloud
+      </button>
+    </div>
+
+    <!-- Quick PDF Export -->
+    <button onclick="window.print()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-medium text-sm flex items-center gap-2 transition shadow-lg shadow-indigo-500/10">
+      <i data-lucide="download" class="w-4 h-4"></i> Cetak PDF Pitch Deck
+    </button>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-1 p-6 max-w-7xl w-full mx-auto">
+    
+    <!-- ==================== TAB 1: STORYLINE & SCRIPT ==================== -->
+    <div id="tab-content-storyline" class="space-y-6">
+      <!-- AI Script Assistant Banner -->
+      <div class="bg-slate-900 border border-indigo-900/40 rounded-2xl p-5 shadow-inner relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-2xl pointer-events-none"></div>
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="space-y-1 w-full md:max-w-xl">
+            <div class="flex items-center gap-2 text-indigo-400 font-bold text-sm uppercase tracking-wider">
+              <i data-lucide="sparkles" class="w-4 h-4 text-indigo-400"></i>
+              AI Script Copilot (Gemini 2.5)
+            </div>
+            <h3 class="text-lg font-bold text-slate-100">Butuh Ide Cerita atau Konsep Adegan MV?</h3>
+            <p class="text-sm text-slate-400">Tulis premis kasar ide MV-mu di bawah. Gemini AI akan menyusun breakdown adegan dan camera angle secara instan!</p>
+          </div>
+          <div class="flex-1 max-w-md w-full flex gap-2">
+            <input 
+              type="text" 
+              id="script-ai-prompt" 
+              placeholder="Contoh: MV Synthwave malam hari di jalanan Jakarta, nuansa retro melankolis..." 
+              class="flex-1 bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:outline-none rounded-xl px-4 py-2 text-sm text-slate-200"
+            />
+            <button 
+              onclick="generateAIScript()" 
+              id="btn-generate-script"
+              class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm flex items-center gap-2 transition shrink-0"
+            >
+              Generate
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Script Table -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+        <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+          <div>
+            <h3 class="text-md font-bold text-slate-100">Draf Naskah & Deskripsi Teknis</h3>
+            <p class="text-xs text-slate-400 mt-1">Gunakan tabel ini untuk sinkronisasi visual video dan trek audio/musik secara real-time.</p>
+          </div>
+          <button onclick="addStorylineRow()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Tambah Adegan
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-950 border-b border-slate-800 text-xs text-slate-400 font-bold uppercase">
+                <th class="p-4 w-16 text-center">No</th>
+                <th class="p-4 w-48">Angle & Durasi</th>
+                <th class="p-4">Visual / Video Direksi</th>
+                <th class="p-4">Audio / Musik / Sound Effect</th>
+                <th class="p-4 w-12 text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="storyline-table-body" class="divide-y divide-slate-800/60">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== TAB 2: STORYBOARD CREATOR ==================== -->
+    <div id="tab-content-storyboard" class="space-y-6 hidden">
+      <!-- Aspect Ratio & Workspace Settings -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <i data-lucide="layout" class="w-5 h-5 text-indigo-400"></i>
+          <div>
+            <h4 class="text-sm font-bold text-slate-200">Kustomisasi Storyboard</h4>
+            <p class="text-xs text-slate-400">Atur aspect ratio canvas sesuai dengan target platform karyamu.</p>
+          </div>
+        </div>
+        <div class="flex items-center flex-wrap justify-end gap-3">
+          <span class="text-xs text-slate-400 font-semibold">Aspect Ratio:</span>
+          <div class="flex bg-slate-950 p-1 rounded-lg border border-slate-800">
+            <button onclick="setAspectRatio('16:9')" id="ratio-16-9" class="px-3 py-1 text-xs font-bold rounded-md bg-indigo-600 text-white transition">16:9</button>
+            <button onclick="setAspectRatio('9:16')" id="ratio-9-16" class="px-3 py-1 text-xs font-bold rounded-md text-slate-400 hover:text-slate-200 transition">9:16</button>
+            <button onclick="setAspectRatio('1:1')" id="ratio-1-1" class="px-3 py-1 text-xs font-bold rounded-md text-slate-400 hover:text-slate-200 transition">1:1</button>
+          </div>
+          <button onclick="addStoryboardPanel()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold flex items-center gap-2 transition">
+            <i data-lucide="plus" class="w-4 h-4"></i> Tambah Panel
+          </button>
+        </div>
+      </div>
+
+      <!-- Storyboard Grid -->
+      <div id="storyboard-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Rendered via JS -->
+      </div>
+    </div>
+
+    <!-- ==================== TAB 3: MOODBOARD CANVAS ==================== -->
+    <div id="tab-content-moodboard" class="space-y-6 hidden">
+      <!-- Toolbar -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <i data-lucide="palette" class="w-5 h-5 text-indigo-400"></i>
+          <div>
+            <h4 class="text-sm font-bold text-slate-200">Creative Moodboard Canvas</h4>
+            <p class="text-xs text-slate-400">Letakkan inspirasi visual, skema palet warna, dan gambar AI sesukamu (bisa diseret!)</p>
+          </div>
+        </div>
+        <div class="flex items-center flex-wrap gap-2">
+          <button onclick="addMoodboardItem('sticky')" class="px-3 py-1.5 rounded-xl bg-amber-500 text-slate-950 text-xs font-bold flex items-center gap-1.5 hover:bg-amber-400 transition">
+            <i data-lucide="type" class="w-3.5 h-3.5"></i> + Sticky Note
+          </button>
+          <button onclick="addMoodboardItem('palette')" class="px-3 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold flex items-center gap-1.5 transition">
+            <i data-lucide="palette" class="w-3.5 h-3.5"></i> + Skema Warna
+          </button>
+          <label class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold flex items-center gap-1.5 cursor-pointer transition">
+            <i data-lucide="upload" class="w-3.5 h-3.5"></i> + Upload Foto
+            <input type="file" accept="image/*" onchange="uploadMoodboardImage(event)" class="hidden">
+          </label>
+          <button onclick="openAiImageSelector(null)" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-pink-600 text-white text-xs font-bold flex items-center gap-1.5 hover:from-indigo-500 hover:to-pink-500 transition shadow-md">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> AI Mood Image
+          </button>
+        </div>
+      </div>
+
+      <!-- Moodboard Canvas & Editor Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <!-- Interactive Canvas Area -->
+        <div class="lg:col-span-3">
+          <div 
+            id="moodboard-canvas" 
+            class="w-full h-[600px] bg-slate-950 border-2 border-dashed border-slate-800 rounded-3xl relative overflow-hidden shadow-inner bg-dots"
+          >
+            <!-- Rendered via JS dynamically -->
+          </div>
+        </div>
+
+        <!-- Properties Editor -->
+        <div class="lg:col-span-1">
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-5 sticky top-24">
+            <div class="flex items-center gap-2 border-b border-slate-800 pb-3">
+              <i data-lucide="sliders" class="w-4.5 h-4.5 text-indigo-400"></i>
+              <h4 class="text-xs uppercase font-bold tracking-wider text-slate-400">Properti Elemen</h4>
+            </div>
+            <div id="mood-properties-panel" class="space-y-4">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== TAB 4: SETTINGS & EXPORT ==================== -->
+    <div id="tab-content-settings" class="max-w-2xl mx-auto space-y-6">
+      
+      <!-- DATABASE CONFIGURATION CARD -->
+      <div class="bg-slate-900 border border-indigo-950/80 rounded-3xl p-6 space-y-4 shadow-xl">
+        <h3 class="text-md font-bold text-slate-100 flex items-center gap-2">
+          <i data-lucide="database" class="w-5 h-5 text-indigo-400"></i>
+          Google Sheets Database Sync
+        </h3>
+        <p class="text-xs text-slate-400 leading-relaxed">Hubungkan PrevisStudio ke Google Sheets milikmu agar data otomatis tersinkronisasi antar perangkat (bisa dibuka di HP teman atau laptop lain secara bersamaan).</p>
+        
+        <div class="space-y-3">
+          <div>
+            <label class="text-[10px] uppercase tracking-wider text-slate-400 font-bold block mb-1">Google Web App URL</label>
+            <input 
+              type="text" 
+              id="db-sheet-url"
+              placeholder="https://script.google.com/macros/s/XXXXX/exec"
+              class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:outline-none rounded-xl p-3.5 text-xs text-slate-300"
+            />
+          </div>
+          
+          <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+            <div class="flex gap-2">
+              <button onclick="saveDatabaseConfig()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition">
+                Simpan & Aktifkan
+              </button>
+              <button onclick="testDatabaseConnection()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition">
+                Tes Hubungkan
+              </button>
+            </div>
+            <div class="flex items-center gap-1.5" id="db-status-badge">
+              <span class="w-2 h-2 rounded-full bg-slate-600"></span>
+              <span class="text-[10px] uppercase font-bold text-slate-500">Offline</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-3.5 bg-slate-950 rounded-xl border border-slate-850 text-[11px] text-slate-500 space-y-1">
+          <p class="font-bold text-slate-400">Panduan Ringkas Setup:</p>
+          <ol class="list-decimal list-inside space-y-0.5">
+            <li>Buka Google Sheets baru, lalu klik menu <span class="font-semibold text-slate-300">Extensions -> Apps Script</span>.</li>
+            <li>Hapus kode bawaan, ganti dengan script yang ada di panel kanan, lalu klik ikon **Save (Floppy Disk)**.</li>
+            <li>Klik tombol biru **Deploy -> New deployment**, pilih jenis **Web app**.</li>
+            <li>Ubah bagian **Who has access** menjadi **Anyone**, lalu klik **Deploy**.</li>
+            <li>Salin **Web app URL** yang muncul, lalu tempel di kolom input di atas!</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- Pitch deck Meta -->
+      <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-6">
+        <div class="border-b border-slate-800 pb-4">
+          <h3 class="text-md font-bold text-slate-100 flex items-center gap-2">
+            <i data-lucide="file-text" class="w-5 h-5 text-indigo-400"></i>
+            Informasi Dokumen & Presentasi (Pitch Deck)
+          </h3>
+          <p class="text-xs text-slate-400 mt-1">Lengkapi data di bawah ini untuk hasil ekspor cetak PDF terbaik.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="text-xs font-bold text-slate-400 block mb-1">Judul Project Video/Iklan</label>
+            <input 
+              type="text" 
+              id="settings-title" 
+              class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:outline-none rounded-xl p-3 text-sm text-slate-200"
+              oninput="updateProjectMeta('title', this.value)"
+            />
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-400 block mb-1">Nama Sutradara / Director</label>
+            <input 
+              type="text" 
+              id="settings-director" 
+              class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:outline-none rounded-xl p-3 text-sm text-slate-200"
+              oninput="updateProjectMeta('director', this.value)"
+            />
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-400 block mb-1">Klien / Brand</label>
+            <input 
+              type="text" 
+              id="settings-client" 
+              placeholder="e.g. Sony Music Indonesia"
+              class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:outline-none rounded-xl p-3 text-sm text-slate-200"
+              oninput="updateProjectMeta('client', this.value)"
+            />
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-400 block mb-1">Gaya Musik/Visual</label>
+            <input 
+              type="text" 
+              id="settings-genre" 
+              placeholder="e.g. Synthwave Melancholy"
+              class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:outline-none rounded-xl p-3 text-sm text-slate-200"
+              oninput="updateProjectMeta('genre', this.value)"
+            />
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ==================== MODAL: SKETCH DRAWING CANVAS ==================== -->
+  <div id="modal-sketch" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-2xl w-full space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <i data-lucide="paintbrush" class="w-5 h-5 text-indigo-400"></i>
+          <h3 class="text-md font-bold text-slate-100">Gambar Sketsa Storyboard</h3>
+        </div>
+        <button onclick="closeModal('modal-sketch')" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-4">
+        <!-- Toolkit -->
+        <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 flex sm:flex-col justify-between sm:justify-start gap-4">
+          <div>
+            <label class="text-[10px] uppercase font-bold text-slate-500 block mb-1">Warna Kuas</label>
+            <div class="grid grid-cols-4 sm:grid-cols-2 gap-1.5" id="brush-colors">
+              <!-- Colors added by JS -->
+            </div>
+          </div>
+          <div>
+            <label class="text-[10px] uppercase font-bold text-slate-500 block mb-1">Ukuran Kuas</label>
+            <input type="range" min="1" max="20" value="5" id="brush-size" oninput="updateBrushSize(this.value)" class="w-full accent-indigo-500 mt-1">
+            <span class="text-[10px] text-slate-400 font-bold block text-center mt-1" id="brush-size-text">5px</span>
+          </div>
+          <button onclick="clearCanvas()" class="p-2 bg-slate-900 hover:bg-slate-800 rounded-xl text-slate-400 hover:text-slate-200 text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reset
+          </button>
+        </div>
+
+        <!-- Canvas -->
+        <div class="flex-1 border border-slate-800 bg-slate-950 rounded-2xl overflow-hidden shadow-inner flex items-center justify-center relative">
+          <canvas id="sketch-canvas" width="500" height="350" class="bg-slate-950 cursor-crosshair max-w-full"></canvas>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between border-t border-slate-800 pt-4">
+        <span class="text-xs text-slate-500">Sketsa langsung di layar komputermu tanpa ribet!</span>
+        <div class="flex gap-2">
+          <button onclick="closeModal('modal-sketch')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-sm transition">Batal</button>
+          <button onclick="saveCanvasDrawing()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition">Pasang Sketsa</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: AI IMAGE GENERATOR ==================== -->
+  <div id="modal-ai-image" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-lg w-full space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <i data-lucide="sparkles" class="w-5 h-5 text-violet-400 animate-pulse"></i>
+          <h3 class="text-md font-bold text-slate-100">AI Storyboard Painter (Imagen 4.0)</h3>
+        </div>
+        <button onclick="closeModal('modal-ai-image')" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="text-xs font-bold text-slate-400 block mb-1">Visual Prompt Adegan</label>
+          <textarea 
+            id="ai-image-prompt"
+            placeholder="Contoh: neon cyberpunk room with high contrast blue and fuchsia lighting, extreme close up on a vintage camera, cinematic look..."
+            class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:outline-none rounded-xl p-3.5 text-sm text-slate-200 min-h-[100px] resize-y"
+          ></textarea>
+          <p class="text-[10px] text-indigo-400 mt-1 flex items-center gap-1">
+            <i data-lucide="sparkles" class="w-3 h-3"></i> Gunakan bahasa Inggris agar gambar AI berkualitas optimal.
+          </p>
+        </div>
+
+        <!-- Loader -->
+        <div id="ai-loading-indicator" class="bg-slate-950 p-4 rounded-2xl border border-slate-800 flex items-center gap-4 hidden">
+          <div class="w-8 h-8 rounded-full border-2 border-indigo-500 border-t-transparent animate-spin"></div>
+          <div>
+            <h5 class="text-xs font-bold text-indigo-400">Sedang melukis visual adegan...</h5>
+            <p class="text-[10px] text-slate-500">Membutuhkan waktu sekitar 5-10 detik. Mohon tunggu.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between border-t border-slate-800 pt-4">
+        <span class="text-[10px] text-slate-500">Didukung oleh Gemini Imagen 4.0</span>
+        <div class="flex gap-2">
+          <button onclick="closeModal('modal-ai-image')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-sm transition">Batal</button>
+          <button onclick="generateAIImage()" id="btn-paint-ai" class="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-semibold text-sm transition">Lukis Adegan</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-900 bg-slate-950/80 py-6 px-6 mt-12 text-center text-xs text-slate-600 print:hidden">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <p>© 2026 Hanaskar Team. Dashboard pra-produksi MV & Iklan interaktif terintegrasi AI.</p>
+      <p class="flex items-center gap-1.5 text-indigo-500">
+        <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Designed for Real-time Creative Pre-production
+      </p>
+    </div>
+  </footer>
+
+  <!-- ==================== APPLICATION CORE LOGIC ==================== -->
+  <script>
+    // Config
+    const apiKey = "";
+    let activeTab = "storyline";
+
+    // Unique Client ID to track edits and avoid self-overwrites in multi-device sync
+    const myUserId = Math.random().toString(36).substring(7);
+
+    // Read URL Parameters to see if user is in an active Room
+    const urlParams = new URLSearchParams(window.location.search);
+    let currentRoom = urlParams.get('room') || null;
+
+    // Application State with Local Storage Backup
+    let state = {
+      projectTitle: "Neon Dreams - MV Concept",
+      director: "Nathan Izz Wardhana",
+      client: "",
+      genre: "",
+      aspectRatio: "16:9",
+      senderId: myUserId, // Tracking changes creator
+      storyline: [
+        { id: '1', sceneNo: '1', video: 'Pembuka: Close-up mata artis yang perlahan terbuka, diiringi pencahayaan neon merah jambu redup.', audio: 'Instrumen synthwave mulai masuk perlahan (fade-in), detak jantung konstan.', duration: '5s', angle: 'Extreme Close-Up' },
+        { id: '2', sceneNo: '2', video: 'Artis berjalan menyusuri lorong sempit yang dipenuhi lampu neon bergaya retro-futuristik.', audio: 'Vokal utama masuk dengan efek reverb tinggi: "Di bawah bayang malam..."', duration: '8s', angle: 'Tracking Shot' },
+        { id: '3', sceneNo: '3', video: 'Siluet bayangan menari di balik dinding kaca buram dengan warna biru kontras.', audio: 'Ketukan drum (beat) penuh masuk, tempo meningkat.', duration: '6s', angle: 'Medium Shot' }
+      ],
+      storyboard: [
+        { id: 's1', panelNo: 1, image: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=500&q=80', description: 'Transisi visual dari gelap gulita ke pancaran lampu neon fuchsia.', camera: 'Extreme Close-Up', duration: '5s' },
+        { id: 's2', panelNo: 2, image: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=500&q=80', description: 'Pemeran utama menghadap ke jendela kota malam yang diguyur hujan.', camera: 'Medium Close-Up', duration: '8s' },
+        { id: 's3', panelNo: 3, image: null, description: 'Layar terbagi dua (split screen) menampilkan refleksi mata dan kota futuristik.', camera: 'Split Screen', duration: '6s' }
+      ],
+      moodboard: [
+        { id: 'm1', type: 'sticky', x: 50, y: 50, w: 180, h: 180, content: 'Konsep MV: Cyberpunk Melankolis dengan paduan warna hangat/dingin kontras.', bg: '#fbbf24', color: '#1e293b' },
+        { id: 'm2', type: 'palette', x: 280, y: 50, w: 220, h: 120, content: '#FF0055,#00F0FF,#1A0B2E,#7000FF', bg: '#ffffff', color: '' },
+        { id: 'm3', type: 'image', x: 50, y: 260, w: 240, h: 180, content: 'https://images.unsplash.com/photo-1515260268569-9271009adfdb?auto=format&fit=crop&w=500&q=80', bg: '', color: '' },
+        { id: 'm4', type: 'text', x: 320, y: 220, w: 200, h: 100, content: 'Referensikan gaya visual dari film Blade Runner & Drive (2011).', bg: '#4f46e5', color: '#ffffff' }
+      ]
+    };
+
+    // Load State from LocalStorage
+    function loadState() {
+      const saved = localStorage.getItem("previs_studio_state");
+      if (saved) {
+        try {
+          state = JSON.parse(saved);
+        } catch (e) {
+          console.error("Gagal memuat local storage", e);
+        }
+      }
+    }
+
+    // Save State to LocalStorage (and Debounce API Sync with Google Sheet)
+    let syncTimer = null;
+    function saveState() {
+      state.senderId = myUserId; // Record that we did this modification
+      localStorage.setItem("previs_studio_state", JSON.stringify(state));
+      
+      const sheetUrl = localStorage.getItem("previs_sheet_url");
+      if (sheetUrl && currentRoom) {
+        if (syncTimer) clearTimeout(syncTimer);
+        
+        // Show local loading state
+        const dot = document.getElementById("sync-dot");
+        const txt = document.getElementById("sync-text");
+        dot.className = "w-2 h-2 rounded-full bg-amber-500 animate-pulse";
+        txt.innerText = "Menyimpan ke Cloud...";
+
+        syncTimer = setTimeout(async () => {
+          try {
+            await fetch(sheetUrl, {
+              method: "POST",
+              mode: "no-cors", // Standard CORS workaround for Apps Script Web App redirects
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                room: currentRoom,
+                state: JSON.stringify(state)
+              })
+            });
+            dot.className = "w-2 h-2 rounded-full bg-emerald-500";
+            txt.innerText = `Terhubung (Room: ${currentRoom})`;
+          } catch(e) {
+            console.error("Sync error", e);
+            dot.className = "w-2 h-2 rounded-full bg-rose-500";
+            txt.innerText = "Gagal sinkronisasi!";
+          }
+        }, 1200); // 1.2s delay to prevent spamming Google Sheets on active typing
+      }
+    }
+
+    // Polling Mechanism to fetch changes from Google Sheet database
+    let pollingTimer = null;
+    function startDatabasePolling() {
+      if (pollingTimer) clearInterval(pollingTimer);
+      
+      const sheetUrl = localStorage.getItem("previs_sheet_url");
+      if (!sheetUrl || !currentRoom) return;
+
+      pollingTimer = setInterval(async () => {
+        try {
+          const response = await fetch(`${sheetUrl}?room=${currentRoom}`);
+          const resJson = await response.json();
+          
+          if (resJson && resJson.state) {
+            const remoteState = JSON.parse(resJson.state);
+            // Only update local if the sender of that change is NOT us.
+            // This avoids overwrite while typing!
+            if (remoteState && remoteState.senderId !== myUserId) {
+              state = remoteState;
+              
+              // Soft sync fields
+              document.getElementById("project-title").value = state.projectTitle;
+              document.getElementById("project-director").value = state.director;
+              document.getElementById("aspect-ratio-badge").innerText = state.aspectRatio;
+
+              renderActiveTab();
+            }
+          }
+        } catch(err) {
+          console.error("Polling database error", err);
+        }
+      }, 5000); // Polls Google Sheet every 5 seconds for real-time collaboration simulation
+    }
+
+    // Google Sheets Config controls
+    function saveDatabaseConfig() {
+      const urlInput = document.getElementById("db-sheet-url").value.trim();
+      if (!urlInput) {
+        localStorage.removeItem("previs_sheet_url");
+        showToast("Konfigurasi database dinonaktifkan.", "error");
+        updateDatabaseStatusUI();
+        return;
+      }
+
+      localStorage.setItem("previs_sheet_url", urlInput);
+      
+      // Auto assign room parameter if not exist to make it collaborative
+      if (!currentRoom) {
+        const randomRoom = 'room-' + Math.floor(1000 + Math.random() * 9000);
+        const url = new URL(window.location.href);
+        url.searchParams.set('room', randomRoom);
+        window.history.pushState({}, '', url);
+        currentRoom = randomRoom;
+      }
+
+      updateDatabaseStatusUI();
+      saveState(); // push immediate first sync
+      startDatabasePolling();
+      showToast("Google Sheet database berhasil terhubung & Room Kolaborasi Aktif!");
+    }
+
+    async function testDatabaseConnection() {
+      const urlInput = document.getElementById("db-sheet-url").value.trim();
+      if(!urlInput) {
+        showToast("Masukkan URL terlebih dahulu", "error");
+        return;
+      }
+      showToast("Mencoba menghubungkan...", "info");
+      try {
+        const response = await fetch(`${urlInput}?room=test-conn-check`);
+        const json = await response.json();
+        if(json) {
+          showToast("Koneksi Sukses! Google Apps Script merespon dengan benar.");
+        }
+      } catch(e) {
+        showToast("Gagal terhubung. Pastikan CORS dan setelan Web app deploy sudah 'Anyone'", "error");
+      }
+    }
+
+    function updateDatabaseStatusUI() {
+      const sheetUrl = localStorage.getItem("previs_sheet_url");
+      const dot = document.getElementById("sync-dot");
+      const txt = document.getElementById("sync-text");
+      const badge = document.getElementById("db-status-badge");
+      const inviteBtn = document.getElementById("invite-btn");
+
+      if (sheetUrl) {
+        document.getElementById("db-sheet-url").value = sheetUrl;
+        
+        if (currentRoom) {
+          dot.className = "w-2 h-2 rounded-full bg-emerald-500";
+          txt.innerText = `Terhubung (Room: ${currentRoom})`;
+          inviteBtn.classList.remove("hidden");
+          badge.innerHTML = `
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span class="text-[10px] uppercase font-bold text-emerald-500">Online & Syncing</span>
+          `;
+        } else {
+          dot.className = "w-2 h-2 rounded-full bg-indigo-500";
+          txt.innerText = "Database Terhubung";
+          badge.innerHTML = `
+            <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+            <span class="text-[10px] uppercase font-bold text-indigo-500">Ready</span>
+          `;
+        }
+      } else {
+        dot.className = "w-2 h-2 rounded-full bg-slate-600";
+        txt.innerText = "Database Off-line";
+        inviteBtn.classList.add("hidden");
+        badge.innerHTML = `
+          <span class="w-2 h-2 rounded-full bg-slate-600"></span>
+          <span class="text-[10px] uppercase font-bold text-slate-500">Offline</span>
+        `;
+      }
+    }
+
+    function copyInviteLink() {
+      const dummy = document.createElement('input');
+      dummy.value = window.location.href;
+      document.body.appendChild(dummy);
+      dummy.select();
+      document.execCommand('copy');
+      document.body.removeChild(dummy);
+      showToast("Link kolaborasi berhasil disalin! Bagikan ke WhatsApp temanmu.");
+    }
+
+    // Tab Switching
+    function switchTab(tabId) {
+      activeTab = tabId;
+      document.querySelectorAll('[id^="tab-content-"]').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`tab-content-${tabId}`).classList.remove('hidden');
+
+      document.querySelectorAll('[id^="tab-"]').forEach(btn => {
+        btn.className = "px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition text-slate-400 hover:text-slate-200";
+      });
+      const activeBtn = document.getElementById(`tab-${tabId}`);
+      activeBtn.className = "px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition bg-slate-800 text-white shadow-sm";
+      
+      renderActiveTab();
+    }
+
+    function renderActiveTab() {
+      if (activeTab === 'storyline') renderStoryline();
+      if (activeTab === 'storyboard') renderStoryboard();
+      if (activeTab === 'moodboard') renderMoodboard();
+      if (activeTab === 'settings') renderSettings();
+      lucide.createIcons();
+    }
+
+    // --- STORYLINE TAB HANDLERS ---
+    function renderStoryline() {
+      const tbody = document.getElementById("storyline-table-body");
+      tbody.innerHTML = "";
+      state.storyline.forEach((row, idx) => {
+        const trHtml = `
+          <tr class="hover:bg-slate-900/40 transition">
+            <td class="p-4 text-center font-bold text-indigo-400">${row.sceneNo}</td>
+            <td class="p-4 space-y-2">
+              <div>
+                <label class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Kamera Angle</label>
+                <input 
+                  type="text" 
+                  value="${row.angle || ''}" 
+                  oninput="updateStorylineField('${row.id}', 'angle', this.value)"
+                  class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:outline-none rounded-md px-2 py-1 text-xs mt-1"
+                />
+              </div>
+              <div>
+                <label class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Durasi</label>
+                <input 
+                  type="text" 
+                  value="${row.duration || ''}" 
+                  oninput="updateStorylineField('${row.id}', 'duration', this.value)"
+                  class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:outline-none rounded-md px-2 py-1 text-xs mt-1"
+                />
+              </div>
+            </td>
+            <td class="p-4">
+              <textarea 
+                placeholder="Tulis detail aksi visual..."
+                oninput="updateStorylineField('${row.id}', 'video', this.value)"
+                class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:outline-none rounded-xl p-3 text-sm min-h-[90px] resize-y"
+              >${row.video || ''}</textarea>
+            </td>
+            <td class="p-4">
+              <textarea 
+                placeholder="Tulis lirik musik atau dialog..."
+                oninput="updateStorylineField('${row.id}', 'audio', this.value)"
+                class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:outline-none rounded-xl p-3 text-sm min-h-[90px] resize-y"
+              >${row.audio || ''}</textarea>
+            </td>
+            <td class="p-4 text-center">
+              <button onclick="deleteStorylineRow('${row.id}')" class="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+        tbody.insertAdjacentHTML('beforeend', trHtml);
+      });
+    }
+
+    function updateStorylineField(id, field, val) {
+      state.storyline = state.storyline.map(r => r.id === id ? { ...r, [field]: val } : r);
+      saveState();
+    }
+
+    function addStorylineRow() {
+      const nextNo = state.storyline.length + 1;
+      state.storyline.push({
+        id: String(Date.now()),
+        sceneNo: String(nextNo),
+        video: "",
+        audio: "",
+        duration: "5s",
+        angle: "Medium Shot"
+      });
+      saveState();
+      renderStoryline();
+      lucide.createIcons();
+      showToast("Adegan baru berhasil ditambahkan!");
+    }
+
+    function deleteStorylineRow(id) {
+      state.storyline = state.storyline.filter(r => r.id !== id).map((r, i) => ({ ...r, sceneNo: String(i + 1) }));
+      saveState();
+      renderStoryline();
+      lucide.createIcons();
+      showToast("Adegan dihapus", "error");
+    }
+
+    // AI Script Generator via Gemini
+    async function generateAIScript() {
+      const promptInput = document.getElementById("script-ai-prompt");
+      const prompt = promptInput.value.trim();
+      if (!prompt) {
+        showToast("Tulis premis kasar ide MV kamu dulu", "error");
+        return;
+      }
+
+      const btn = document.getElementById("btn-generate-script");
+      btn.innerText = "Memproses...";
+      btn.disabled = true;
+      showToast("Gemini AI sedang merancang adegan terbaikmu...", "info");
+
+      const systemPrompt = "Kamu adalah Sutradara MV & Iklan profesional. Buat 3 sequence adegan kreatif berdasarkan input pengguna, sajikan persis dalam format JSON yang valid mengikuti responseSchema berikut.";
+      const userQuery = `Buat konsep adegan MV berdurasi pendek berdasarkan konsep ini: "${prompt}"`;
+
+      try {
+        const response = await fetchWithRetry(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: userQuery }] }],
+              systemInstruction: { parts: [{ text: systemPrompt }] },
+              generationConfig: {
+                responseMimeType: "application/json",
+                responseSchema: {
+                  type: "OBJECT",
+                  properties: {
+                    scenes: {
+                      type: "ARRAY",
+                      items: {
+                        type: "OBJECT",
+                        properties: {
+                          video: { type: "STRING" },
+                          audio: { type: "STRING" },
+                          duration: { type: "STRING" },
+                          angle: { type: "STRING" }
+                        },
+                        required: ["video", "audio", "duration", "angle"]
+                      }
+                    }
+                  },
+                  required: ["scenes"]
+                }
+              }
+            })
+          }
+        );
+
+        const text = response.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (text) {
+          const parsed = JSON.parse(text);
+          if (parsed && parsed.scenes) {
+            parsed.scenes.forEach((s, idx) => {
+              const nextNo = state.storyline.length + 1;
+              state.storyline.push({
+                id: String(Date.now() + idx),
+                sceneNo: String(nextNo),
+                video: s.video,
+                audio: s.audio,
+                duration: s.duration,
+                angle: s.angle
+              });
+            });
+            saveState();
+            renderStoryline();
+            lucide.createIcons();
+            showToast("AI berhasil melengkapi naskah storyline!");
+            promptInput.value = "";
+          }
+        }
+      } catch (e) {
+        console.error(e);
+        showToast("Koneksi terputus atau kunci API tidak valid. Masukkan API key di atas kode untuk mengaktifkan AI.", "error");
+      } finally {
+        btn.innerText = "Generate";
+        btn.disabled = false;
+      }
+    }
+
+
+    // --- STORYBOARD TAB HANDLERS ---
+    function setAspectRatio(ratio) {
+      state.aspectRatio = ratio;
+      document.getElementById("aspect-ratio-badge").innerText = ratio;
+      
+      // Update Button Styles
+      ['16-9', '9-16', '1-1'].forEach(r => {
+        const btn = document.getElementById(`ratio-${r}`);
+        const cleanRatio = r.replace('-', ':');
+        if (ratio === cleanRatio) {
+          btn.className = "px-3 py-1 text-xs font-bold rounded-md bg-indigo-600 text-white transition";
+        } else {
+          btn.className = "px-3 py-1 text-xs font-bold rounded-md text-slate-400 hover:text-slate-200 transition";
+        }
+      });
+
+      saveState();
+      renderStoryboard();
+      lucide.createIcons();
+    }
+
+    function getAspectRatioInlineStyle() {
+      if (state.aspectRatio === "16:9") return "aspect-ratio: 16/9;";
+      if (state.aspectRatio === "9:16") return "aspect-ratio: 9/16; max-width: 280px; margin: 0 auto;";
+      return "aspect-ratio: 1/1;";
+    }
+
+    function renderStoryboard() {
+      const grid = document.getElementById("storyboard-grid");
+      grid.innerHTML = "";
+
+      state.storyboard.forEach((panel) => {
+        const imageContent = panel.image 
+          ? `<img src="${panel.image}" alt="Panel" class="w-full h-full object-cover" />`
+          : `<div class="text-center p-6 space-y-2">
+               <i data-lucide="image" class="w-8 h-8 text-slate-700 mx-auto"></i>
+               <p class="text-xs font-medium text-slate-500">Gambar kosong</p>
+             </div>`;
+
+        const panelHtml = `
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden flex flex-col group hover:border-slate-700 transition duration-300">
+            <!-- Aspect Ratio Box -->
+            <div style="${getAspectRatioInlineStyle()}" class="relative bg-slate-950 border-b border-slate-800 w-full overflow-hidden flex items-center justify-center">
+              ${imageContent}
+
+              <!-- Hover Menu Overlay -->
+              <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center gap-2.5 transition-all duration-200">
+                <div class="text-xs font-bold text-indigo-400 tracking-wider mb-1 uppercase">Media Input</div>
+                <div class="flex gap-2">
+                  <button onclick="openDrawingCanvas('${panel.id}')" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
+                    <i data-lucide="paintbrush" class="w-3.5 h-3.5"></i> Sketsa
+                  </button>
+                  <button onclick="openAiImageSelector('${panel.id}')" class="px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> AI Imagen
+                  </button>
+                </div>
+                <label class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-1.5 shadow-sm cursor-pointer transition">
+                  <i data-lucide="upload" class="w-3.5 h-3.5"></i> Upload Foto
+                  <input type="file" accept="image/*" onchange="uploadStoryboardImage('${panel.id}', event)" class="hidden">
+                </label>
+                ${panel.image ? `<button onclick="deletePanelImage('${panel.id}')" class="px-3 py-1 rounded-lg bg-rose-600/25 hover:bg-rose-600/40 text-rose-300 text-xs font-bold transition">Hapus Gambar</button>` : ''}
+              </div>
+
+              <div class="absolute top-3 left-3 bg-slate-900/90 border border-slate-700/60 px-2.5 py-1 rounded-lg text-xs font-bold text-indigo-400">
+                Panel ${panel.panelNo}
+              </div>
+            </div>
+
+            <!-- Metadata details -->
+            <div class="p-4 flex-1 flex flex-col justify-between space-y-4">
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Pergerakan Kamera</label>
+                  <input 
+                    type="text" 
+                    value="${panel.camera || ''}" 
+                    oninput="updateStoryboardField('${panel.id}', 'camera', this.value)"
+                    placeholder="e.g. Extreme Close Up" 
+                    class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:outline-none rounded-lg px-2.5 py-1 text-xs mt-1 font-medium"
+                  />
+                </div>
+                <div>
+                  <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Durasi Panel</label>
+                  <input 
+                    type="text" 
+                    value="${panel.duration || ''}" 
+                    oninput="updateStoryboardField('${panel.id}', 'duration', this.value)"
+                    placeholder="4s" 
+                    class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:outline-none rounded-lg px-2.5 py-1 text-xs mt-1 font-medium"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Visual & Catatan Adegan</label>
+                <textarea 
+                  oninput="updateStoryboardField('${panel.id}', 'description', this.value)"
+                  placeholder="Ketik deskripsi visual di sini..." 
+                  class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:outline-none rounded-lg p-2.5 text-xs mt-1 min-h-[70px] resize-none"
+                >${panel.description || ''}</textarea>
+              </div>
+
+              <div class="flex items-center justify-between border-t border-slate-800/85 pt-3">
+                <span class="text-[10px] text-slate-400 font-medium">PrevisStudio Panel</span>
+                <button onclick="deleteStoryboardPanel('${panel.id}')" class="p-1.5 rounded-md text-slate-600 hover:text-rose-400 hover:bg-rose-500/10 transition">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+        grid.insertAdjacentHTML('beforeend', panelHtml);
+      });
+
+      // Add Panel Helper Button
+      const addBtnHtml = `
+        <button onclick="addStoryboardPanel()" class="border-2 border-dashed border-slate-800 hover:border-indigo-500/50 bg-slate-900/10 hover:bg-slate-900/30 rounded-2xl flex flex-col items-center justify-center p-8 text-slate-500 hover:text-indigo-400 transition min-h-[350px] group">
+          <div class="w-12 h-12 rounded-full bg-slate-900 group-hover:bg-indigo-500/10 flex items-center justify-center mb-3 border border-slate-800 group-hover:border-indigo-500/20 transition">
+            <i data-lucide="plus" class="w-6 h-6"></i>
+          </div>
+          <span class="text-sm font-bold">Tambah Panel Storyboard</span>
+          <p class="text-xs text-slate-600 mt-1 max-w-[200px] text-center">Buat draf panel visual adegan baru untuk presentasimu.</p>
+        </button>
+      `;
+      grid.insertAdjacentHTML('beforeend', addBtnHtml);
+    }
+
+    function addStoryboardPanel() {
+      const nextNo = state.storyboard.length + 1;
+      state.storyboard.push({
+        id: String(Date.now()),
+        panelNo: nextNo,
+        image: null,
+        description: "",
+        camera: "Wide Shot",
+        duration: "4s"
+      });
+      saveState();
+      renderStoryboard();
+      lucide.createIcons();
+      showToast("Panel storyboard baru ditambahkan!");
+    }
+
+    function updateStoryboardField(id, field, value) {
+      state.storyboard = state.storyboard.map(p => p.id === id ? { ...p, [field]: value } : p);
+      saveState();
+    }
+
+    function deleteStoryboardPanel(id) {
+      state.storyboard = state.storyboard.filter(p => p.id !== id).map((p, i) => ({ ...p, panelNo: i + 1 }));
+      saveState();
+      renderStoryboard();
+      lucide.createIcons();
+      showToast("Panel berhasil dihapus", "error");
+    }
+
+    function deletePanelImage(id) {
+      updateStoryboardField(id, 'image', null);
+      renderStoryboard();
+      lucide.createIcons();
+    }
+
+    function uploadStoryboardImage(id, event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          updateStoryboardField(id, 'image', e.target.result);
+          renderStoryboard();
+          lucide.createIcons();
+          showToast("Gambar referensi berhasil diunggah!");
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+
+    // --- BRUSH DRAWING SYSTEM ---
+    let currentPanelDrawId = null;
+    let canvas, ctx;
+    let isDrawing = false;
+    let brushColor = "#ffffff";
+    let brushSize = 5;
+
+    function initDrawingCanvas() {
+      canvas = document.getElementById("sketch-canvas");
+      ctx = canvas.getContext("2d");
+
+      // Setup Drawing events for desktop & Mobile
+      canvas.addEventListener("mousedown", startDraw);
+      canvas.addEventListener("mousemove", performDraw);
+      canvas.addEventListener("mouseup", stopDraw);
+      canvas.addEventListener("mouseleave", stopDraw);
+
+      canvas.addEventListener("touchstart", startDraw, { passive: false });
+      canvas.addEventListener("touchmove", performDraw, { passive: false });
+      canvas.addEventListener("touchend", stopDraw);
+
+      // Render Brush Colors list
+      const colorsDiv = document.getElementById("brush-colors");
+      colorsDiv.innerHTML = "";
+      const palette = ['#ffffff', '#f87171', '#fbbf24', '#4ade80', '#38bdf8', '#c084fc', '#020617', '#475569'];
+      palette.forEach(color => {
+        const btn = document.createElement("button");
+        btn.className = `w-6 h-6 rounded-md border border-slate-850 ${brushColor === color ? 'ring-2 ring-indigo-500' : ''}`;
+        btn.style.backgroundColor = color;
+        btn.onclick = () => {
+          brushColor = color;
+          document.querySelectorAll("#brush-colors button").forEach(b => b.classList.remove("ring-2", "ring-indigo-500"));
+          btn.classList.add("ring-2", "ring-indigo-500");
+        };
+        colorsDiv.appendChild(btn);
+      });
+    }
+
+    function openDrawingCanvas(panelId) {
+      currentPanelDrawId = panelId;
+      document.getElementById("modal-sketch").classList.remove("hidden");
+      if (!canvas) initDrawingCanvas();
+
+      // Reset & load existing image
+      ctx.fillStyle = "#1e293b";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const panel = state.storyboard.find(p => p.id === panelId);
+      if (panel && panel.image && panel.image.startsWith('data:image')) {
+        const img = new Image();
+        img.onload = () => {
+          ctx.drawImage(img, 0, 0);
+        };
+        img.src = panel.image;
+      }
+    }
+
+    function getMousePos(e) {
+      const rect = canvas.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return {
+        x: (clientX - rect.left) * (canvas.width / rect.width),
+        y: (clientY - rect.top) * (canvas.height / rect.height)
+      };
+    }
+
+    function startDraw(e) {
+      e.preventDefault();
+      isDrawing = true;
+      const pos = getMousePos(e);
+      ctx.beginPath();
+      ctx.moveTo(pos.x, pos.y);
+    }
+
+    function performDraw(e) {
+      if (!isDrawing) return;
+      e.preventDefault();
+      const pos = getMousePos(e);
+      ctx.lineTo(pos.x, pos.y);
+      ctx.strokeStyle = brushColor;
+      ctx.lineWidth = brushSize;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.stroke();
+    }
+
+    function stopDraw() {
+      isDrawing = false;
+    }
+
+    function clearCanvas() {
+      ctx.fillStyle = "#1e293b";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      showToast("Kanvas dibersihkan");
+    }
+
+    function updateBrushSize(val) {
+      brushSize = val;
+      document.getElementById("brush-size-text").innerText = `${val}px`;
+    }
+
+    function saveCanvasDrawing() {
+      if (currentPanelDrawId) {
+        const dataUrl = canvas.toDataURL("image/png");
+        updateStoryboardField(currentPanelDrawId, "image", dataUrl);
+        renderStoryboard();
+        lucide.createIcons();
+        closeModal("modal-sketch");
+        showToast("Sketsa storyboard berhasil dipasang!");
+      }
+    }
+
+
+    // --- MOODBOARD INTERACTIVE CANVAS (Drag & Drop) ---
+    let selectedMoodId = null;
+    let draggingItem = null;
+    let startDragCoords = { x: 0, y: 0 };
+
+    function renderMoodboard() {
+      const canvasArea = document.getElementById("moodboard-canvas");
+      canvasArea.innerHTML = "";
+
+      state.moodboard.forEach((item) => {
+        let contentHtml = "";
+
+        if (item.type === 'sticky') {
+          contentHtml = `
+            <textarea 
+              oninput="updateMoodContent('${item.id}', this.value)" 
+              placeholder="Tulis ide..." 
+              class="w-full h-full bg-transparent border-none resize-none focus:outline-none font-medium text-xs leading-relaxed"
+            >${item.content || ''}</textarea>
+          `;
+        } else if (item.type === 'text') {
+          contentHtml = `
+            <textarea 
+              oninput="updateMoodContent('${item.id}', this.value)" 
+              placeholder="Tulis deskripsi..." 
+              class="w-full h-full bg-transparent border-none resize-none focus:outline-none text-xs font-semibold leading-relaxed text-white"
+            >${item.content || ''}</textarea>
+          `;
+        } else if (item.type === 'palette') {
+          const colors = item.content.split(',');
+          contentHtml = `
+            <div class="flex flex-col gap-2.5 h-full justify-center">
+              <div class="flex gap-1 h-8 rounded-lg overflow-hidden">
+                ${colors.map(color => `
+                  <div 
+                    class="flex-1 h-full hover:scale-105 transition cursor-pointer" 
+                    style="background-color: ${color.trim()}"
+                    onclick="copyColorToClipboard('${color.trim()}')"
+                    title="Klik untuk menyalin"
+                  ></div>
+                `).join('')}
+              </div>
+              <div class="text-[9px] text-slate-400 font-bold text-center tracking-tight">${item.content}</div>
+            </div>
+          `;
+        } else if (item.type === 'image') {
+          contentHtml = `
+            <img src="${item.content}" alt="Mood" class="w-full h-full object-cover rounded-xl" draggable="false" />
+          `;
+        }
+
+        const isSelected = selectedMoodId === item.id;
+        const itemHtml = `
+          <div 
+            id="mood-item-${item.id}"
+            style="left: ${item.x}px; top: ${item.y}px; width: ${item.w}px; height: ${item.h}px; background-color: ${item.type === 'image' ? '#0f172a' : item.bg}; color: ${item.color}; touch-action: none;"
+            onmousedown="startDragMood(event, '${item.id}')"
+            ontouchstart="startDragMood(event, '${item.id}')"
+            onclick="selectMoodItem(event, '${item.id}')"
+            class="absolute group rounded-2xl shadow-xl overflow-hidden cursor-grab active:cursor-grabbing select-none p-4 pb-3 transition-shadow hover:shadow-2xl flex flex-col justify-between border ${isSelected ? 'ring-2 ring-indigo-500 border-indigo-500' : 'border-slate-800/40'}"
+          >
+            <!-- Top Drag Handle Bar (Header khusus untuk menggeser) -->
+            <div class="flex items-center justify-between gap-2 mb-2 text-xs opacity-75 group-hover:opacity-100 transition-opacity bg-slate-950/40 -mx-4 -mt-4 px-4 py-2 border-b border-white/5 drag-handle">
+              <span class="font-bold uppercase tracking-wider text-[9px] flex items-center gap-1.5 text-slate-300">
+                <i data-lucide="move" class="w-3.5 h-3.5"></i> ${item.type}
+              </span>
+              <button onclick="deleteMoodItem(event, '${item.id}')" class="p-1 rounded hover:bg-rose-500/20 text-rose-400 delete-btn-mood transition">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+
+            <!-- Content Area -->
+            <div class="flex-1 overflow-hidden relative mt-1">
+              ${contentHtml}
+            </div>
+          </div>
+        `;
+        canvasArea.insertAdjacentHTML('beforeend', itemHtml);
+      });
+
+      if (state.moodboard.length === 0) {
+        canvasArea.innerHTML = `
+          <div class="absolute inset-0 flex flex-col items-center justify-center text-slate-600 gap-2 pointer-events-none">
+            <i data-lucide="layers" class="w-12 h-12 text-slate-700"></i>
+            <p class="text-sm font-bold">Kanvas Moodboard kosong</p>
+            <p class="text-xs">Gunakan tombol di atas untuk meramaikan moodboard idemu.</p>
+          </div>
+        `;
+      }
+
+      renderMoodProperties();
+    }
+
+    function addMoodboardItem(type, contentValue = "") {
+      const id = String(Date.now());
+      let newItem = {
+        id,
+        type,
+        x: 50 + (state.moodboard.length * 20) % 200,
+        y: 50 + (state.moodboard.length * 20) % 200,
+        w: 180,
+        h: 150,
+        content: contentValue || "Teks ide barumu...",
+        bg: "#3b82f6",
+        color: "#ffffff"
+      };
+
+      if (type === 'sticky') {
+        newItem.bg = "#fbbf24";
+        newItem.color = "#1e293b";
+        newItem.w = 160;
+        newItem.h = 160;
+      } else if (type === 'palette') {
+        newItem.content = "#FF007F,#7F00FF,#00F0FF,#1A1A2E";
+        newItem.w = 200;
+        newItem.h = 100;
+        newItem.bg = "#1e293b";
+      } else if (type === 'image') {
+        newItem.content = contentValue || 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&w=500&q=80';
+        newItem.w = 220;
+        newItem.h = 170;
+      }
+
+      state.moodboard.push(newItem);
+      selectedMoodId = id;
+      saveState();
+      renderMoodboard();
+      lucide.createIcons();
+    }
+
+    function selectMoodItem(e, id) {
+      e.stopPropagation();
+      selectedMoodId = id;
+      renderMoodboard();
+      lucide.createIcons();
+    }
+
+    function updateMoodContent(id, value) {
+      state.moodboard = state.moodboard.map(item => item.id === id ? { ...item, content: value } : item);
+      saveState();
+    }
+
+    function deleteMoodItem(e, id) {
+      e.stopPropagation();
+      state.moodboard = state.moodboard.filter(item => item.id !== id);
+      if (selectedMoodId === id) selectedMoodId = null;
+      saveState();
+      renderMoodboard();
+      lucide.createIcons();
+      showToast("Elemen dihapus", "error");
+    }
+
+    function copyColorToClipboard(hex) {
+      const el = document.createElement('textarea');
+      el.value = hex;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      showToast(`Disalin ke clipboard: ${hex}`);
+    }
+
+    function uploadMoodboardImage(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          addMoodboardItem('image', e.target.result);
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    // Canvas Item Drag Logic (Mouse & Touch) - FIX REALTIME DRAG & TOUCH
+    function startDragMood(e, id) {
+      // Jangan jalankan drag jika klik tombol delete atau di dalam textarea/input teks
+      if (e.target.closest('.delete-btn-mood') || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+
+      const item = state.moodboard.find(m => m.id === id);
+      if (!item) return;
+
+      selectedMoodId = id;
+
+      const canvasArea = document.getElementById("moodboard-canvas");
+      const rect = canvasArea.getBoundingClientRect();
+
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+      // Hitung koordinat klik relatif di dalam canvas area
+      const mouseX = clientX - rect.left;
+      const mouseY = clientY - rect.top;
+
+      // Ambil selisih jarak dari posisi kursor ke ujung kiri-atas elemen (offset)
+      startDragCoords = {
+        x: mouseX - item.x,
+        y: mouseY - item.y
+      };
+
+      draggingItem = item;
+
+      // Hanya cegah default di perangkat layar sentuh agar layar tidak ikutan scroll
+      if (e.touches) {
+        e.preventDefault();
+      }
+
+      document.addEventListener("mousemove", performDragMood);
+      document.addEventListener("mouseup", stopDragMood);
+      document.addEventListener("touchmove", performDragMood, { passive: false });
+      document.addEventListener("touchend", stopDragMood);
+    }
+
+    function performDragMood(e) {
+      if (!draggingItem) return;
+
+      // Cegah default scroll browser pada mobile
+      if (e.cancelable) {
+        e.preventDefault();
+      }
+
+      const canvasArea = document.getElementById("moodboard-canvas");
+      const rect = canvasArea.getBoundingClientRect();
+
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+      // Posisi pointer saat ini relatif terhadap canvas
+      const mouseX = clientX - rect.left;
+      const mouseY = clientY - rect.top;
+
+      // Hitung posisi baru dikurangi offset awal agar tidak bergeser mendadak
+      let newX = mouseX - startDragCoords.x;
+      let newY = mouseY - startDragCoords.y;
+
+      // Batasi agar tidak keluar dari area kanvas moodboard
+      newX = Math.max(0, Math.min(rect.width - draggingItem.w, newX));
+      newY = Math.max(0, Math.min(rect.height - draggingItem.h, newY));
+
+      draggingItem.x = newX;
+      draggingItem.y = newY;
+
+      // Update posisi DOM secara instan tanpa re-render keseluruhan agar lancar
+      const itemEl = document.getElementById(`mood-item-${draggingItem.id}`);
+      if (itemEl) {
+        itemEl.style.left = `${newX}px`;
+        itemEl.style.top = `${newY}px`;
+      }
+    }
+
+    function stopDragMood() {
+      if (draggingItem) {
+        saveState();
+        draggingItem = null;
+      }
+      document.removeEventListener("mousemove", performDragMood);
+      document.removeEventListener("mouseup", stopDragMood);
+      document.removeEventListener("touchmove", performDragMood);
+      document.removeEventListener("touchend", stopDragMood);
+    }
+
+    // Properties Inspector rendering
+    function renderMoodProperties() {
+      const panel = document.getElementById("mood-properties-panel");
+      const active = state.moodboard.find(m => m.id === selectedMoodId);
+
+      if (!active) {
+        panel.innerHTML = `
+          <div class="text-center p-6 text-slate-500 space-y-2">
+            <i data-lucide="help-circle" class="w-8 h-8 mx-auto text-slate-700"></i>
+            <p class="text-xs font-semibold">Tidak ada elemen dipilih</p>
+            <p class="text-[11px] text-slate-600">Klik kartu di papan kanvas untuk mengatur properties warna dan ukurannya.</p>
+          </div>
+        `;
+        return;
+      }
+
+      let innerHtml = `
+        <div class="space-y-4">
+          <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
+            <span class="text-[10px] uppercase font-bold text-slate-500">Tipe Aktif</span>
+            <p class="text-sm font-bold text-indigo-400 capitalize mt-0.5">${active.type}</p>
+          </div>
+      `;
+
+      if (active.type === 'palette') {
+        innerHtml += `
+          <div>
+            <label class="text-xs text-slate-400 font-bold block mb-1">Kode HEX Warna (pisahkan koma)</label>
+            <input 
+              type="text" 
+              value="${active.content}" 
+              oninput="updateMoodProperty('${active.id}', 'content', this.value)"
+              class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:outline-none rounded-xl p-2.5 text-xs text-slate-200"
+            />
+          </div>
+        `;
+      }
+
+      if (active.type === 'sticky' || active.type === 'text') {
+        const bgColors = ['#fbbf24', '#f87171', '#3b82f6', '#4f46e5', '#10b981', '#ec4899', '#06b6d4', '#1e293b', '#0f172a'];
+        innerHtml += `
+          <div>
+            <label class="text-xs text-slate-400 font-bold block mb-1.5">Warna Latar Belakang</label>
+            <div class="grid grid-cols-5 gap-2">
+              ${bgColors.map(color => `
+                <button 
+                  onclick="updateMoodProperty('${active.id}', 'bg', '${color}')"
+                  class="w-full h-8 rounded-lg border border-slate-850 ${active.bg === color ? 'ring-2 ring-indigo-500 scale-110' : ''}"
+                  style="background-color: ${color}"
+                ></button>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      // Height/Width dimensions
+      innerHtml += `
+        <div>
+          <label class="text-xs text-slate-400 font-bold block mb-1.5">Dimensi Elemen</label>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <span class="text-[10px] text-slate-500 block">Lebar (px)</span>
+              <input 
+                type="number" 
+                value="${active.w}" 
+                oninput="updateMoodProperty('${active.id}', 'w', Number(this.value))"
+                class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:outline-none rounded-xl p-2 text-xs mt-1"
+              />
+            </div>
+            <div>
+              <span class="text-[10px] text-slate-500 block">Tinggi (px)</span>
+              <input 
+                type="number" 
+                value="${active.h}" 
+                oninput="updateMoodProperty('${active.id}', 'h', Number(this.value))"
+                class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:outline-none rounded-xl p-2 text-xs mt-1"
+              />
+            </div>
+          </div>
+        </div>
+
+        <button onclick="deleteMoodItem(event, '${active.id}')" class="w-full py-2.5 rounded-xl border border-rose-900/30 bg-rose-950/20 hover:bg-rose-900/30 text-rose-300 font-bold text-xs flex items-center justify-center gap-1.5 transition">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Hapus Elemen Kanvas
+        </button>
+      </div>
+      `;
+
+      panel.innerHTML = innerHtml;
+    }
+
+    function updateMoodProperty(id, field, val) {
+      state.moodboard = state.moodboard.map(item => item.id === id ? { ...item, [field]: val } : item);
+      saveState();
+      renderMoodboard();
+      lucide.createIcons();
+    }
+
+
+    // --- SETTINGS TAB ---
+    function renderSettings() {
+      document.getElementById("settings-title").value = state.projectTitle || "";
+      document.getElementById("settings-director").value = state.director || "";
+      document.getElementById("settings-client").value = state.client || "";
+      document.getElementById("settings-genre").value = state.genre || "";
+      updateDatabaseStatusUI();
+    }
+
+    function updateProjectMeta(field, value) {
+      if (field === 'title') {
+        state.projectTitle = value;
+        document.getElementById("project-title").value = value;
+      }
+      if (field === 'director') {
+        state.director = value;
+        document.getElementById("project-director").value = value;
+      }
+      if (field === 'client') state.client = value;
+      if (field === 'genre') state.genre = value;
+      saveState();
+    }
+
+
+    // --- AI IMAGEN GENERATOR ENGINE ---
+    let currentPanelAiId = null; // null means target is Moodboard
+
+    function openAiImageSelector(panelId) {
+      currentPanelAiId = panelId;
+      document.getElementById("ai-image-prompt").value = "";
+      document.getElementById("ai-loading-indicator").classList.add("hidden");
+      document.getElementById("modal-ai-image").classList.remove("hidden");
+    }
+
+    async function generateAIImage() {
+      const prompt = document.getElementById("ai-image-prompt").value.trim();
+      if (!prompt) {
+        showToast("Tulis deskripsi gambar dulu", "error");
+        return;
+      }
+
+      const loader = document.getElementById("ai-loading-indicator");
+      const btn = document.getElementById("btn-paint-ai");
+
+      loader.classList.remove("hidden");
+      btn.disabled = true;
+      showToast("AI Imagen sedang melukis karyamu...", "info");
+
+      try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`;
+        const payload = {
+          instances: [{ prompt: prompt }],
+          parameters: { sampleCount: 1, aspectRatio: state.aspectRatio === '16:9' ? '16:9' : '1:1' }
+        };
+
+        const response = await fetchWithRetry(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (response && response.predictions && response.predictions[0]?.bytesBase64Encoded) {
+          const base64Image = `data:image/png;base64,${response.predictions[0].bytesBase64Encoded}`;
+          
+          if (currentPanelAiId) {
+            updateStoryboardField(currentPanelAiId, 'image', base64Image);
+            renderStoryboard();
+            showToast("Gambar AI dipasang di storyboard!");
+          } else {
+            addMoodboardItem('image', base64Image);
+            showToast("Gambar AI dipasang di moodboard!");
+          }
+          closeModal("modal-ai-image");
+        } else {
+          throw new Error('Image empty');
+        }
+      } catch (err) {
+        console.error(err);
+        showToast("Gagal memproses gambar AI. Periksa koneksi atau masukkan API key.", "error");
+      } finally {
+        loader.classList.add("hidden");
+        btn.disabled = false;
+      }
+    }
+
+
+    // --- MODAL CONTROLLERS ---
+    function closeModal(id) {
+      document.getElementById(id).classList.add("hidden");
+    }
+
+
+    // Close moodboard selector if clicking empty canvas area
+    document.addEventListener("click", (e) => {
+      if (activeTab === 'moodboard' && !e.target.closest('[id^="mood-item-"]') && !e.target.closest('#mood-properties-panel') && !e.target.closest('.delete-btn-mood')) {
+        selectedMoodId = null;
+        renderMoodboard();
+        lucide.createIcons();
+      }
+    });
+
+    // STARTUP SYSTEM
+    window.onload = function() {
+      loadState();
+      
+      // Sync DOM elements with State metadata
+      document.getElementById("project-title").value = state.projectTitle;
+      document.getElementById("project-director").value = state.director;
+      document.getElementById("aspect-ratio-badge").innerText = state.aspectRatio;
+
+      renderActiveTab();
+      updateDatabaseStatusUI();
+      
+      // Auto-start polling if GSheets database is active
+      if (localStorage.getItem("previs_sheet_url") && currentRoom) {
+        startDatabasePolling();
+      }
+    };
+  </script>
+</body>
+</html>
